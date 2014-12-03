@@ -27,11 +27,16 @@ class ListView(MethodView):
     def post(self):
         context = self.get_context()
         form = context.get('form')
+        name = request.form['name']
 
         if form.validate():
-            user = User()
-            form.populate_obj(user)
-
+            user = User.objects(name=name)
+            if not user:
+                user = User()
+                form.populate_obj(user)
+            else:
+                user = user[0]
+                user.age = request.form['age']
             user.save()
 
         return render_template('users/list.html', **context)
