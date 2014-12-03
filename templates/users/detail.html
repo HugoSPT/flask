@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+
+{% block page_header %}
+  <div class="page-header">
+    <h1>{{ user.name }}</h1>
+  </div>
+{% endblock %}
+
+{% block content %}
+  <p>{{ user.age }}<p>
+  <p>{{ user.created_at.strftime('%H:%M %Y-%m-%d') }}</p>
+  <hr>
+{% endblock %}
