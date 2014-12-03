@@ -1,8 +1,17 @@
 {% extends "base.html" %}
 
+{% import "_forms.html" as forms %}
+
 {% block content %}
     {% for user in users %}
-      <h2><a href="{{ url_for('users.detail', user=user.name) }}">{{ user.name }}</a></h2>
+      <h2><a href="{{ url_for('users.detail', name=user.name) }}">{{ user.name }}</a></h2>
       <p>
     {% endfor %}
+    <h2>Add user</h2>
+    <form action="." method="post">
+        {{ forms.render(form) }}
+        <div class="actions">
+            <input type="submit" class="btn primary" value="user">
+        </div>
+    </form>
 {% endblock %}

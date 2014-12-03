@@ -7,7 +7,7 @@
 {% endblock %}
 
 {% block content %}
-  <p>{{ user.age }}<p>
-  <p>{{ user.created_at.strftime('%H:%M %Y-%m-%d') }}</p>
+  <p>Age: {{ user.age }}<p>
+  <p>User creation date: {{ user.created_at.strftime('%H:%M %Y-%m-%d') }}</p>
   <hr>
 {% endblock %}

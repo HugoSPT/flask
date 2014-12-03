@@ -8,7 +8,7 @@ class User(db.Document):
     age = db.IntField(required=True)
 
     def get_absolute_url(self):
-        return url_for('user', kwargs={"name": self.name})
+        return url_for('name', kwargs={"name": self.name})
 
     def __unicode__(self):
         return self.name
