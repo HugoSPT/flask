@@ -18,10 +18,12 @@ class ListView(MethodView):
             "users": users,
             "form": form
         }
+        
         return context
     
     def get(self):
         context = self.get_context()
+        
         return render_template('users/list.html', **context)
 
     def post(self):
@@ -31,12 +33,16 @@ class ListView(MethodView):
 
         if form.validate():
             user = User.objects(name=name)
+            
             if not user:
                 user = User()
                 form.populate_obj(user)
             else:
                 user = user[0]
-                user.age = request.form['age']
+                
+                for attr in user:
+                    setattr(user, attr, request.form[attr]) if attr in request.form else None
+
             user.save()
 
         return render_template('users/list.html', **context)
@@ -45,6 +51,7 @@ class DetailView(MethodView):
 
     def get(self, name):
         user = User.objects.get_or_404(name=name)
+        
         return render_template('users/detail.html', user=user)
 
 
