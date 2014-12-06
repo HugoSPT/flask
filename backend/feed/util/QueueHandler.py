@@ -54,8 +54,6 @@ class RabbitPublisher(RabbitQueueHandler):
                          		delivery_mode = 2, # make message persistent
                       		)
 		)
-		#self.i += 1
-		#print "SELF I:", self.i
 
 
 class RabbitConsumer(RabbitQueueHandler):
@@ -80,9 +78,4 @@ class RabbitConsumer(RabbitQueueHandler):
 						no_ack = False,
 					)
 		if body:
-			#print ' Message received'
-			#print
-			#print ' Waiting for messages. To exit press CTRL+C'
-			#self.i += 1
-			#print "RECEIVED I: ", self.i
 			return body
