@@ -2,12 +2,18 @@ __author__ = 'filipe'
 import ConfigParser
 import mongoengine
 import datetime
+import cPickle as pickle
 from model.Tweet import Tweet
+from backend.feed.util.QueueHandler import \
+	RabbitQueueHandler
 
+
+config = ConfigParser.ConfigParser()
+config.read('../../config.cfg')
 
 class DbModule():
-    def start(self):
-        mongoengine.connect('TweetInTime',host=config.get('System', 'mongo'))
+    def __init__(self):
+        mongoengine.connect(config.get('System', 'mongo-db-name'),host=config.get('System', 'mongo'))
     def create_tweet(self,tweetJson):
         tweet = self.get_tweet(tweetJson.id_str)
         if not tweet:
@@ -21,11 +27,19 @@ class DbModule():
         tweet =  Tweet.objects(id_str=id_str)
         return tweet[0] if tweet else None
 
-if __name__ == '__main__':
-	config = ConfigParser.ConfigParser()
-	config.read('../../config.cfg')
-dbModule = DbModule()
-dbModule.start()
-print dbModule.get_tweet("test")
-dbModule.create_tweet(Tweet(id_str="test", name="test",text="aojfdajfalskjdlasjdlksjd",loc="",sentiment=0,created_at=datetime.datetime.now()))
-print dbModule.get_tweet("test")
+class Rabbitmq():
+    dbModule = DbModule()
+    def __init__(self):
+        self.queue_handler = RabbitQueueHandler()
+        self.consumer = self.queue_handler.cons_register(config.get('Queue', 'db'))
+        self.run()
+    def run(self):
+        while True:
+            tweet = self.consumer.consume_task()
+            if tweet:
+                dbModule.create_tweet(tweet)
+                print pickle.loads(tweet)
+
+
+if __name__ == '__main__':config = \
+dbModule = Rabbitmq()

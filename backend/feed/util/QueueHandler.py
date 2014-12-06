@@ -5,7 +5,7 @@ import logging
 
 
 config = ConfigParser.ConfigParser()
-config.read('../../../config.cfg')
+config.read('../../config.cfg')
 
 RABBIT_MQ_IP = config.get("System", "rabbit")
 
