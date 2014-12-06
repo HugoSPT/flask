@@ -6,7 +6,7 @@ import random
 from twython import TwythonStreamer
 
 def search_words():
-    with open("/Users/Fabio/Downloads/effectwordnet/EffectWordNet.tff") as f:
+    with open("./resources/EffectWordNet.tff") as f:
         def split_line(x)   :
             return x.split("\t")
         effects_and_words = [(split_line(x)[1], split_line(x)[2].split(",")) for x in f.readlines()]
