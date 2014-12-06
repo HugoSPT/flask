@@ -5,7 +5,7 @@ __author__ = 'fabiim'
 
 import time
 import random
-
+import time
 config = ConfigParser.ConfigParser()
 config.read('../../../config.cfg')
 
@@ -44,7 +44,6 @@ class MyStreamer(TwythonStreamer):
 
     def on_success(self, data):
         if 'text' in data:
-            print(data)
             self.publisher.publish_task(data=pickle.dumps(data), keys=QUEUE_FEED)
 
     def on_error(self, status_code, data):
@@ -58,8 +57,10 @@ def run_feed_listener(trace_words):
         stream = MyStreamer("vYn0ES5AIqaxtl582gcQrfozZ", "S22Tah9Plo4vlJzQ1WgZYt4ML8FoacQ9QMTa1KjvHiZTs3DkMF",
                         "296786432-hI6eoypFeXRYjpKzSo1QMsgoVh1iNC8Qmn2Bgya0",
                         "3vcmBuleaxirMfU3amLDGAIUUQDT0CutAtDoM1De8Xm8t")
-
-        stream.statuses.filter(lang="en", track=trace_words)
+        try:
+            stream.statuses.filter(lang="en", track=trace_words)
+        except Exception:
+            stream.disconnect()
 
 def main():
     positives, negatives = search_words()
@@ -73,16 +74,12 @@ def main():
 
     trace_words = ",".join(positives) + ",".join(negatives)
 
-    run_feed_listener(trace_words)
-
-
-        # except Exception:
-        #     continue
-
-    # auth = OAuthHandler(ckey, csecret)
-    # auth.set_access_token(atoken, asecret)
-    # twitterStream = Stream(auth, listener())
-    # twitterStream.filter(track=trace_words.split(", "))
+    while True:
+        try:
+            run_feed_listener(trace_words)
+        except Exception:
+            time.sleep(1)
+            continue
 
 
 if __name__ == '__main__':
