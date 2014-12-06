@@ -6,7 +6,7 @@ import logging
 class RabbitQueueHandler(object):
 
 	def __init__(self):
-		self.connection = pika.BlockingConnection(pika.ConnectionParameters('192.168.1.65'))
+		self.connection = pika.BlockingConnection(pika.ConnectionParameters('192.168.1.73'))
 		self.channel 	= self.connection.channel()
 		self.channel.exchange_declare(exchange='impakt', type='direct')
 
