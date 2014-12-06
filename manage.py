@@ -1,4 +1,6 @@
-import os, sys 
+import os, sys
+
+import ConfigParser
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))) 
 
