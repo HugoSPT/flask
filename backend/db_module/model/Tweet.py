@@ -2,13 +2,15 @@ __author__ = 'filipe'
 from mongoengine import \
     Document, \
     StringField, \
-    DecimalField
-
+    DecimalField, \
+    DateTimeField
 
 class Tweet(Document):
-    tweetId = StringField()
-    user = StringField()
+    id_str = StringField()
+    name = StringField()
+    text = StringField()
     loc = StringField()
     sentiment = DecimalField()
+    created_at = DateTimeField()
 
 

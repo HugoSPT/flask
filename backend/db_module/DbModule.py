@@ -1,24 +1,36 @@
 __author__ = 'filipe'
 import ConfigParser
 import mongoengine
+import datetime
 from model.Tweet import Tweet
 
-def createTweet(tweetId,user,loc,sentiment):
-    tweet = Tweet()
-    tweet.tweetId = tweetId
-    tweet.user = user
-    tweet.loc = loc
-    tweet.sentiment = sentiment
-    tweet.save()
+
+class DbModule():
+    def start(self):
+        mongoengine.connect('TweetInTime',host=config.get('System', 'mongo'))
+    def create_tweet(self,tweetJson):
+        tweet = self.getTweet(tweetJson.id_str)
+        if not tweet:
+            tweet = Tweet()
+        for attr in tweet._fields.keys():
+            if not attr == 'id':
+                setattr(tweet, attr, tweetJson[attr])
+        tweet.save()
+
+    def get_tweet(self,id_str):
+        tweet =  Tweet.objects(id_str=id_str)
+        return tweet[0] if tweet else None
+
+    def exists_tweet(self,id_str):
+        return bool(self.getTweet(id_str))
+
 
 if __name__ == '__main__':
 	config = ConfigParser.ConfigParser()
 	config.read('../../config.cfg')
 
-mongoengine.connect('TweetInTime',host=config.get('System', 'mongo'))
-rs = Tweet.objects()
-newTweet = Tweet
-createTweet("test","test","loc",0)
-for result in rs :
-    print(result.user)
-
+dbModule = DbModule()
+dbModule.start()
+print dbModule.get_tweet("test")
+dbModule.create_tweet(Tweet(id_str="test", name="test",text="aojfdajfalskjdlasjdlksjd",loc="",sentiment=0,created_at=datetime.datetime.now()))
+print dbModule.exists_tweet("test")
