@@ -1,12 +1,18 @@
+import ConfigParser
 import pika
 import cPickle as pickle
 import logging
 
 
+config = ConfigParser.ConfigParser()
+config.read('../../../config.cfg')
+
+RABBIT_MQ_IP = config.get("System", "rabbit")
+
 class RabbitQueueHandler(object):
 
 	def __init__(self):
-		self.connection = pika.BlockingConnection(pika.ConnectionParameters('192.168.1.73'))
+		self.connection = pika.BlockingConnection(pika.ConnectionParameters(RABBIT_MQ_IP))
 		self.channel 	= self.connection.channel()
 		self.channel.exchange_declare(exchange='impakt', type='direct')
 
