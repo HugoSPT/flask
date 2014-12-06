@@ -1,8 +1,7 @@
 from ConfigParser import ConfigParser
+
 from backend.feed.util.QueueHandler import \
 	RabbitQueueHandler
-
-import cPickle as pickle
 
 config = ConfigParser()
 config.read('../../../config.cfg')
@@ -24,8 +23,8 @@ class Broker(object):
 			task = self.consumer.consume_task()
 
 			if task:
-				print pickle.loads(task)
 				self.publisher.publish_task(task)
+
 
 def run():
 	broker = Broker()
