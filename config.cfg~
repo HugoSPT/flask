@@ -1,8 +1,0 @@
-[System]
-Mongo: localhost
-Rabbit: localhost
-mongo-db-name: TweetInTime
-[Queue]
-feed: FEED
-db:DB
-workers: ['localization', 'sentimet', 'backup']

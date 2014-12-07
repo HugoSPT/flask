@@ -2,6 +2,7 @@ __author__ = 'filipe'
 import ConfigParser
 import mongoengine
 import cPickle as pickle
+import pika
 from datetime import datetime
 from model.Tweet import Tweet
 from backend.feed.util.QueueHandler import \
@@ -13,17 +14,12 @@ config.read('../../config.cfg')
 
 class DbModule():
     def __init__(self):
-        self.total = 0
-        self.repeat = 0
         mongoengine.connect(config.get('System', 'mongo-db-name'),host=config.get('System', 'mongo'))
     def create_tweet(self,tweetJson):
         try:
             tweet = self.get_tweet(tweetJson["id"])
-            self.total += 1
             if not tweet:
                 tweet = Tweet()
-            else:
-                self.repeat+=1
             for attr in tweet._fields.keys():
                 if not attr == 'id':
                     if tweetJson.has_key(attr):
@@ -33,9 +29,19 @@ class DbModule():
                             setattr(tweet, attr, datetime.strptime(tweetJson["created_at"],"%a %b %d %H:%M:%S +0000 %Y"))
                         else:
                             setattr(tweet, attr, tweetJson[attr])
-                else:
-                     setattr(tweet, "tweetId", str(tweetJson["id"]))
+                    else:
+                        setattr(tweet, "tweetId", str(tweetJson["id"]))
             tweet.save()
+            connection = pika.BlockingConnection(pika.ConnectionParameters(config.get('System', 'Rabbit')))
+            channel 	= connection.channel()
+            channel.queue_declare(queue=config.get('Queue', 'client'))
+            channel.basic_publish(exchange='',
+                                  routing_key=config.get('Queue', 'client'),
+                                  body=tweet.to_json(),
+                                  properties=pika.BasicProperties(
+                                      delivery_mode = 2,
+                                      )
+            )
         except Exception , e:
             raise
 
@@ -56,7 +62,7 @@ class Rabbitmq():
         tweet = self.consumer.consume_task(self.cb)
 
 
+
 if __name__ == '__main__':config = \
 Rabbitmq()
-print datetime.strptime("Sun Dec 07 01:58:10 +0000 2014","%a %b %d %H:%M:%S +0000 %Y")
 
