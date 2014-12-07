@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang='en'>
+	<head>
+		<script src="https://cdn.socket.io/socket.io-1.2.0.js"></script>
+		<script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+		<script src="http://code.highcharts.com/stock/highstock.js"></script>
+		<script src="http://code.highcharts.com/stock/modules/exporting.js"></script>
+		<script>
+			var socket = io();
+		 	socket.on('msg', function(msg) {
+		 		var div = document.getElementById('feeds');
+		 		var p = document.createTextNode(msg);
+		 		div.appendChild(p);
+				$(document).trigger("msg", [msg]);
+		  	});
+		</script>
+	</head>
+	<body>
+		<h1>X</h1>
+		<div id="graph" style="height: 400px; min-width: 310px"></div>
+		<div id="feeds"> </div>
+	</body>
+</html>
+
+<script src="main.js"></script>
+
