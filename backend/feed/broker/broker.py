@@ -1,4 +1,5 @@
 from ConfigParser import ConfigParser
+import cPickle as pickle
 
 from backend.feed.util.QueueHandler import \
 	RabbitQueueHandler
@@ -11,20 +12,20 @@ QUEUES_WORKERS = config.get('Queue', 'workers')
 
 class Broker(object):
 	def __init__(self):
-		self.queue_handler = RabbitQueueHandler()
-		self.consumer = self.queue_handler.cons_register(QUEUE_FEED)
-		self.publisher = self.queue_handler.pub_register(QUEUES_WORKERS)
+		self.simple_queue_handler = RabbitQueueHandler('')
+		self.consumer = self.simple_queue_handler.cons_register(QUEUE_FEED)
 
-		self.run()
+		self.exchange_queue_handler = RabbitQueueHandler('impakt')
+		self.publisher = self.exchange_queue_handler.pub_register(QUEUES_WORKERS)
 
-	def run(self):
-		while True:
+		self.consumer.consume_task(self.callback)
 
-			task = self.consumer.consume_task()
+	def callback(self, body):
+		self.task = body
+		print pickle.loads(self.task)
+		self.publisher.publish_task(self.task)
 
-			if task:
-				self.publisher.publish_task(task)
-
+		self.task = None
 
 def run():
 	broker = Broker()

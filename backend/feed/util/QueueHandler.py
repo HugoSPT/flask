@@ -11,10 +11,12 @@ RABBIT_MQ_IP = config.get("System", "rabbit")
 
 class RabbitQueueHandler(object):
 
-	def __init__(self):
+	def __init__(self, exchange=None):
 		self.connection = pika.BlockingConnection(pika.ConnectionParameters(RABBIT_MQ_IP))
 		self.channel 	= self.connection.channel()
-		self.channel.exchange_declare(exchange='impakt', type='direct')
+		self.ex         = exchange
+		if self.ex:
+			self.channel.exchange_declare(exchange=self.ex, type='direct')
 
 	def pub_register(self, routing_key):
 		return RabbitPublisher(routing_key, self)
@@ -34,20 +36,18 @@ class RabbitPublisher(RabbitQueueHandler):
 		self.routing_key    = routing_key
 		self.i = 0
 
-	def publish_task(self, data, keys=None):
-		if not keys:
-			for key in self.routing_key:
-				self.publish(data, key)
-		else:
-			for key in keys:
-				if key in self.routing_key:
-					self.publish(data, key)
-				else:
-					logging.error("The key %s is not valid for the register.", key)
+	def create_queue(self):
+		self.channel.queue_declare(queue=self.routing_key)
 
-	def publish(self,data, key):
+	def publish_task(self, data):
+		for key in self.routing_key:
+			self.publish(data, key)
+
+	def publish(self, data, key):
+		exchange = self.parent.ex if self.parent.ex else ''
+
 		message_promise = self.channel.basic_publish(
-			exchange 		= 'impakt',
+			exchange 		= exchange,
 			routing_key 	= key,
 			body 			= data,
 			properties 		= pika.BasicProperties(
@@ -61,21 +61,30 @@ class RabbitConsumer(RabbitQueueHandler):
 		self.parent 		= parent
 		self.channel 		= self.parent.channel
 		self.routing_key    = routing_key
-		self.result 		= self.channel.queue_declare(exclusive=True)
-		self.queue_name 	= self.result.method.queue
-		self.i = 0
+		self.result 		= self.channel.queue_declare(queue=self.routing_key)
 
 		for key in self.routing_key:
-			self.channel.queue_bind(
-						exchange     = 'impakt',
-						queue        = self.queue_name,
+			if self.parent.ex:
+				self.channel.queue_bind(
+						exchange     = self.parent.ex,
+						queue        = self.routing_key,
 						routing_key  = key # binding_key
 					)
-
-	def consume_task(self):
-		method_frame, header_frame, body = self.channel.basic_get(
-						queue  = self.queue_name,
-						no_ack = False,
+			else:
+				self.channel.queue_declare(
+						queue        = self.routing_key
 					)
-		if body:
-			return body
+
+	def consume_task(self, cb):
+		self.cb = cb
+
+		self.channel.basic_consume(
+			self.callback,
+			queue=self.routing_key,
+		)
+
+		self.channel.start_consuming()
+
+	def callback(self, ch, method, properties, body):
+		ch.basic_ack(delivery_tag=method.delivery_tag)
+		self.cb(body)
