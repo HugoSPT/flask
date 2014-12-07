@@ -25,8 +25,6 @@ class Broker(object):
 	def callback(self, body):
 		self.task = pickle.loads(body)
 
-		print self.task['id']
-
 		self.publisher.publish_task(pickle.dumps(self.task))
 
 		self.task = None
