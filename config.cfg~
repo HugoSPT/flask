@@ -1,9 +1,8 @@
 [System]
 Mongo: localhost
-Rabbit: 192.168.1.73
+Rabbit: localhost
 mongo-db-name: TweetInTime
-
 [Queue]
 feed: FEED
-workers: localization,sentiment
-db: DB
+db:DB
+workers: ['localization', 'sentimet', 'backup']
