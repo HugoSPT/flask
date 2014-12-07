@@ -6,11 +6,12 @@ from mongoengine import \
     DateTimeField
 
 class Tweet(Document):
-    id_str = StringField()
-    name = StringField()
+    tweetId = StringField()
+    user = StringField()
     text = StringField()
-    loc = StringField()
-    sentiment = DecimalField()
+    location = StringField()
+    negative = DecimalField()
+    positive = DecimalField()
     created_at = DateTimeField()
 
 
