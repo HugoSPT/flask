@@ -5,7 +5,7 @@ var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 
-var consumer = require('./lib/consumer');
+var consumer = require('./lib/consumer')
 
 var routes = require('./routes/index');
 var users = require('./routes/users');
@@ -58,6 +58,6 @@ app.use(function(err, req, res, next) {
     });
 });
 
-consumer();
+consumer.init();
 
 module.exports = app;
