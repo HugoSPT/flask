@@ -18,8 +18,8 @@ class RabbitQueueHandler(object):
 		if self.ex:
 			self.channel.exchange_declare(exchange=self.ex, type='direct')
 
-	def pub_register(self, routing_key):
-		return RabbitPublisher(routing_key, self)
+	def pub_register(self, routing_key, queue_bind):
+		return RabbitPublisher(routing_key, queue_bind, self)
 
 	def cons_register(self, routing_key):
 		return RabbitConsumer(routing_key, self)
@@ -30,17 +30,19 @@ class RabbitQueueHandler(object):
 
 class RabbitPublisher(RabbitQueueHandler):
 
-	def __init__(self, routing_key, parent):
+	def __init__(self, routing_key, queue_bind, parent):
 		self.parent 		= parent
 		self.channel 		= self.parent.channel
 		self.routing_key    = routing_key
-		self.i = 0
+
+		self.channel.queue_bind(exchange='impakt', queue=queue_bind)
 
 	def create_queue(self):
 		self.channel.queue_declare(queue=self.routing_key)
 
 	def publish_task(self, data):
 		for key in self.routing_key:
+			print key
 			self.publish(data, key)
 
 	def publish(self, data, key):
@@ -54,7 +56,6 @@ class RabbitPublisher(RabbitQueueHandler):
                          		delivery_mode = 2, # make message persistent
                       		)
 		)
-
 
 class RabbitConsumer(RabbitQueueHandler):
 	def __init__(self, routing_key, parent):
