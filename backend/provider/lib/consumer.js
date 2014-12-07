@@ -1,9 +1,14 @@
+'use strict';
+
 var amqp      = require('amqplib');
-var FEED_NAME = "FEED";
+var FEED_NAME = "X";
+var ssocket = require('./serversocket')
+var socket  = ssocket.WebSocket;
+
+var msgs = []
 
 function init() {
 	var connection = amqp.connect('amqp://192.168.1.73');
-	
 	connection.then(function(conn) {
 	    return conn.createChannel().then(function(ch) {
 
@@ -11,9 +16,9 @@ function init() {
 
 	        queue = queue.then(function() {
 	            return ch.consume(FEED_NAME, function(msg) {
-	                console.log(msg.content.toString());
 	                ch.ack(msg);
-	                return;
+	               	msgs[msgs.length] = msg.content.toString();
+	               	socket.useArray(msgs[msgs.length-1]);
 	            });
 	        });
 
@@ -24,4 +29,4 @@ function init() {
 	}).then(null, console.warn);
 }
 
-module.exports = init;
+module.exports.init = init;
